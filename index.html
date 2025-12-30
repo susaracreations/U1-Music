@@ -244,6 +244,15 @@
             animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
             filter: drop-shadow(2px 2px 0px rgba(255, 0, 80, 0.7)) drop-shadow(-2px -2px 0px rgba(0, 255, 255, 0.7));
         }
+
+        /* Live Update Flash Animation */
+        @keyframes flash-update {
+            0% { color: #10B981; text-shadow: 0 0 20px rgba(16, 185, 129, 0.5); transform: scale(1.05); }
+            100% { color: white; text-shadow: none; transform: scale(1); }
+        }
+        .updated {
+            animation: flash-update 0.5s ease-out;
+        }
     </style>
 </head>
 <body class="text-white min-h-screen overflow-x-hidden selection:bg-primary-blue selection:text-white">
@@ -272,7 +281,7 @@
     <header class="sticky top-0 z-50 p-4">
         <div class="max-w-7xl mx-auto">
             <!-- The Pill Header Element -->
-            <div class="bg-glass backdrop-blur-2xl rounded-full border border-glass-stroke px-2 py-2 md:px-6 md:py-3 flex justify-between items-center shadow-2xl shadow-black/20 transition-all duration-300 hover:border-white/20 hover:shadow-primary-blue/10">
+            <div class="bg-glass backdrop-blur-2xl rounded-full border border-glass-stroke px-4 py-2 md:px-6 md:py-3 flex justify-between items-center shadow-2xl shadow-black/20 transition-all duration-300 hover:border-white/20 hover:shadow-primary-blue/10 relative z-50">
                 <a href="#" class="flex items-center space-x-2 text-xl font-bold text-white">
                     <!-- Music Icon (Bot Logo) -->
                     <img src="https://i.ibb.co/HD3VxXzp/U1-music-bot-icon.png" alt="Sus FM Bot Icon" class="w-6 h-6 rounded-md glitch-effect">
@@ -290,10 +299,26 @@
                     <a href="https://discord.gg/bdZhjy3n6z" target="_blank" class="nav-link relative z-10 px-5 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Support</a>
                 </nav>
 
-                <!-- Invite Button -->
-                <a href="https://discord.com/oauth2/authorize?client_id=1418673291190730792&permissions=8&integration_type=0&scope=bot" target="_blank" class="hidden md:inline-flex bg-primary-blue hover:bg-indigo-600 text-white font-semibold py-2 px-6 rounded-full transition duration-300 shadow-lg shadow-primary-blue/30 hover:scale-105 active:scale-95">
-                    Invite Bot
-                </a>
+                <div class="flex items-center gap-3">
+                    <!-- Invite Button -->
+                    <a href="https://discord.com/oauth2/authorize?client_id=1418673291190730792&permissions=8&integration_type=0&scope=bot" target="_blank" class="bg-primary-blue hover:bg-indigo-600 text-white font-semibold py-2 px-4 md:px-6 rounded-full transition duration-300 shadow-lg shadow-primary-blue/30 hover:scale-105 active:scale-95 text-sm md:text-base">
+                        Invite Bot
+                    </a>
+
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobile-menu-btn" class="lg:hidden text-white p-2 rounded-full hover:bg-white/10 transition focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Dropdown -->
+            <div id="mobile-menu" class="absolute top-full left-0 w-full mt-2 p-4 hidden lg:hidden z-40 transform transition-all duration-300 origin-top scale-95 opacity-0">
+                <div class="bg-glass backdrop-blur-3xl rounded-3xl border border-glass-stroke p-4 flex flex-col space-y-2 shadow-2xl bg-dark-navy/90">
+                    <a href="#features" class="mobile-link block px-4 py-3 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white font-medium">Features</a>
+                    <a href="#commands" class="mobile-link block px-4 py-3 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white font-medium">Commands</a>
+                    <a href="https://discord.gg/bdZhjy3n6z" target="_blank" class="mobile-link block px-4 py-3 rounded-xl hover:bg-white/10 transition text-gray-300 hover:text-white font-medium">Support</a>
+                </div>
             </div>
         </div>
     </header>
@@ -310,7 +335,7 @@
                     <span>Powered by Ultra-Fast Lavalink</span>
                 </div>
 
-                <h1 class="text-5xl md:text-7xl font-display font-bold leading-tight tracking-tight">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-tight tracking-tight">
                     The Future of <br> <span class="scramble-text text-transparent bg-clip-text bg-gradient-to-r from-primary-blue via-neon-purple to-pink-500 animate-gradient-x bg-[length:200%_auto]">Discord Audio</span>
                 </h1>
 
@@ -352,9 +377,9 @@
                 
                 <!-- Status Header -->
                 <div class="content-pop flex justify-between items-center pb-4 border-b border-white/10 relative z-10">
-                    <div class="flex items-center space-x-2 text-sm font-medium text-neon-green">
-                        <span class="w-2 h-2 bg-neon-green rounded-full animate-pulse"></span>
-                        <span>BOT ONLINE</span>
+                    <div id="status-container" class="flex items-center space-x-2 text-sm font-medium text-neon-green">
+                        <span id="status-indicator" class="w-2 h-2 bg-neon-green rounded-full animate-pulse"></span>
+                        <span id="status-text">BOT ONLINE</span>
                     </div>
                     <span class="text-sm text-gray-500 font-mono tracking-widest">SUS FM™ v2.0</span>
                 </div>
@@ -362,12 +387,12 @@
                 <!-- Metrics - kept dark for contrast on the glass background -->
                 <div class="content-pop grid grid-cols-2 gap-4 my-6 relative z-10">
                     <div class="p-4 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-sm">
-                        <p class="text-sm text-gray-400">Average Latency</p>
-                        <p class="text-2xl font-display font-bold text-white">&lt;0.05ms</p>
+                        <p class="text-sm text-gray-400">Active Servers</p>
+                        <p id="server-count" class="text-2xl font-display font-bold text-white counter" data-target="">0</p>
                     </div>
                     <div class="p-4 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-sm">
-                        <p class="text-sm text-gray-400">Server Throughput</p>
-                        <p class="text-2xl font-display font-bold text-white">5.5 GB/s</p>
+                        <p class="text-sm text-gray-400">Daily Streams</p>
+                        <p id="stream-count" class="text-2xl font-display font-bold text-white counter" data-target="">0</p>
                     </div>
                     <!-- Lavalink Node Indicator -->
                     <div class="col-span-2 p-3 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-sm flex items-center justify-between">
@@ -539,6 +564,63 @@
         </div>
     </section>
     
+    <!-- TESTIMONIALS SECTION -->
+    <section id="testimonials" class="max-w-7xl mx-auto p-4 md:p-8 mt-20 reveal">
+        <h2 class="text-4xl md:text-5xl font-display font-bold text-center mb-10">
+            Community <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-primary-blue">Vibes</span>
+        </h2>
+        
+        <div class="relative max-w-4xl mx-auto">
+            <!-- Carousel Container -->
+            <div class="overflow-hidden rounded-3xl bg-glass backdrop-blur-xl border border-glass-stroke relative min-h-[300px] md:min-h-[250px]">
+                <div id="testimonial-track" class="flex transition-transform duration-500 ease-out h-full">
+                    <!-- Slide 1 -->
+                    <div class="w-full flex-shrink-0 p-8 md:p-12 flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-blue to-purple-600 mb-4 p-0.5">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-full h-full rounded-full bg-black">
+                        </div>
+                        <p class="text-xl md:text-2xl text-gray-200 font-light italic mb-6">"The audio quality is actually insane. No lag, just pure vibes for our late night gaming sessions."</p>
+                        <h4 class="font-bold text-white">Felix K.</h4>
+                        <span class="text-sm text-primary-blue">Server Owner</span>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="w-full flex-shrink-0 p-8 md:p-12 flex flex-col items-center justify-center text-center">
+                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-neon-green to-teal-500 mb-4 p-0.5">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="User" class="w-full h-full rounded-full bg-black">
+                        </div>
+                        <p class="text-xl md:text-2xl text-gray-200 font-light italic mb-6">"Finally a bot that plays Spotify playlists without stuttering. Sus FM is a permanent resident in our VC."</p>
+                        <h4 class="font-bold text-white">Sarah J.</h4>
+                        <span class="text-sm text-neon-green">Music Mod</span>
+                    </div>
+                    <!-- Slide 3 -->
+                     <div class="w-full flex-shrink-0 p-8 md:p-12 flex flex-col items-center justify-center text-center">
+                         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 mb-4 p-0.5">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="User" class="w-full h-full rounded-full bg-black">
+                        </div>
+                        <p class="text-xl md:text-2xl text-gray-200 font-light italic mb-6">"The bass boost filter is exactly what we needed. 10/10 would recommend."</p>
+                        <h4 class="font-bold text-white">Alex R.</h4>
+                        <span class="text-sm text-pink-500">DJ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <button id="prev-slide" class="absolute top-1/2 -left-4 md:-left-12 transform -translate-y-1/2 bg-black/50 hover:bg-primary-blue text-white p-3 rounded-full backdrop-blur-md border border-white/10 transition-all hover:scale-110 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button id="next-slide" class="absolute top-1/2 -right-4 md:-right-12 transform -translate-y-1/2 bg-black/50 hover:bg-primary-blue text-white p-3 rounded-full backdrop-blur-md border border-white/10 transition-all hover:scale-110 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            
+            <!-- Dots -->
+            <div class="flex justify-center gap-2 mt-6">
+                <button class="dot w-3 h-3 rounded-full bg-white/20 hover:bg-white transition-colors" data-index="0"></button>
+                <button class="dot w-3 h-3 rounded-full bg-white/20 hover:bg-white transition-colors" data-index="1"></button>
+                <button class="dot w-3 h-3 rounded-full bg-white/20 hover:bg-white transition-colors" data-index="2"></button>
+            </div>
+        </div>
+    </section>
+    
     <!-- Footer/Placeholder for other sections -->
     <footer class="mt-20 py-8 text-center text-sm text-gray-500 border-t border-gray-800">
         <p class="mb-1">&copy; 2024 Sus FM. All rights reserved. Spotify and YouTube are registered trademarks.</p>
@@ -549,7 +631,7 @@
     <!-- Floating Music Player Widget -->
     <div class="fixed bottom-6 right-6 z-40 hidden md:flex items-center gap-4 bg-black/60 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 animate-float" style="animation-delay: 1s;">
         <div class="relative w-12 h-12 rounded-lg overflow-hidden shadow-lg shadow-primary-blue/20">
-            <img src="https://i.scdn.co/image/ab67616d0000b2733d92b2ad523296eb8233999d" alt="Album Art" class="w-full h-full object-cover animate-spin-slow">
+            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=150&h=150&fit=crop" alt="Album Art" class="w-full h-full object-cover animate-spin-slow">
             <div class="absolute inset-0 bg-black/10"></div>
         </div>
         <div class="flex flex-col min-w-[120px]">
@@ -638,6 +720,36 @@
             setTimeout(drawLines, 100); // Small delay to ensure all elements are rendered
         });
 
+        // --- Mobile Menu Logic ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.remove('hidden');
+                    // Trigger reflow for transition
+                    void mobileMenu.offsetWidth;
+                    mobileMenu.classList.remove('opacity-0', 'scale-95');
+                } else {
+                    mobileMenu.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        mobileMenu.classList.add('hidden');
+                    }, 300);
+                }
+            });
+
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        mobileMenu.classList.add('hidden');
+                    }, 300);
+                });
+            });
+        }
+
         // --- Scroll Reveal Animation ---
         document.addEventListener('DOMContentLoaded', () => {
             const reveals = document.querySelectorAll('.reveal');
@@ -676,26 +788,29 @@
         // --- 3D Tilt Effect ---
         const tiltCards = document.querySelectorAll('.tilt-card');
         
-        tiltCards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                // Calculate rotation based on mouse position
-                const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
-                const rotateY = ((x - centerX) / centerX) * 10;
+        // Only enable tilt on devices that support hover (desktops) to prevent mobile jitter
+        if (window.matchMedia("(hover: hover)").matches) {
+            tiltCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Calculate rotation based on mouse position
+                    const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+                    const rotateY = ((x - centerX) / centerX) * 10;
 
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
             });
-            
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-            });
-        });
+        }
 
         // --- Modern Header: Sliding Pill Effect ---
         const navLinks = document.querySelectorAll('.nav-link');
@@ -836,6 +951,30 @@
             }
         });
 
+        // --- Live Stats Counter Animation ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 100; // The lower the slower
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText.replace(/,/g, ''); 
+                    
+                    // Lower inc to slow and higher to slow
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc).toLocaleString();
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = target.toLocaleString();
+                    }
+                };
+                updateCount();
+            });
+        });
+
         // --- Particle System (Reacts to Mouse & Simulated Beats) ---
         const initParticles = () => {
             const canvas = document.getElementById('particle-canvas');
@@ -970,23 +1109,42 @@
         
         document.addEventListener('DOMContentLoaded', initParticles);
 
-        // --- Firebase/Authentication Setup (MANDATORY FOR CANVAS) ---
-        
-        // IMPORTANT: The following variables are provided by the hosting environment.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- Testimonial Carousel ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('testimonial-track');
+            const slides = track ? Array.from(track.children) : [];
+            const nextBtn = document.getElementById('next-slide');
+            const prevBtn = document.getElementById('prev-slide');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (!track || slides.length === 0) return;
 
-        if (firebaseConfig) {
-             // For a purely static invite page, Firebase isn't strictly necessary, 
-             // but we include the structure for compliance and future feature expansion.
-             
-             // We do not initialize Firebase here since this is a static page, 
-             // but if you were to add user data, you would include the module imports 
-             // and initialization logic here.
-             console.log("Firebase config detected. Ready for future features like command lookup or user profiles.");
-        }
+            let currentIndex = 0;
 
+            const updateSlide = (index) => {
+                if (index < 0) index = slides.length - 1;
+                if (index >= slides.length) index = 0;
+                
+                currentIndex = index;
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('bg-primary-blue', i === currentIndex);
+                    dot.classList.toggle('scale-125', i === currentIndex);
+                    dot.classList.toggle('bg-white/20', i !== currentIndex);
+                });
+            };
+
+            if (nextBtn) nextBtn.addEventListener('click', () => updateSlide(currentIndex + 1));
+            if (prevBtn) prevBtn.addEventListener('click', () => updateSlide(currentIndex - 1));
+            
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => updateSlide(parseInt(e.target.dataset.index)));
+            });
+
+            setInterval(() => updateSlide(currentIndex + 1), 5000);
+            updateSlide(0);
+        });
 
         // --- Utility function for API Exponential Backoff (MANDATORY FOR API CALLS) ---
         // Although no LLM API call is needed for this static page, this function demonstrates 
@@ -1008,6 +1166,121 @@
                 }
             }
         }
+    </script>
+
+    <!-- Firebase Initialization -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTuXzi7Clh0jeNO72mY6arh8pO4-m6Zv0",
+            authDomain: "susfm-fef66.firebaseapp.com",
+            databaseURL: "https://susfm-fef66-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "susfm-fef66",
+            storageBucket: "susfm-fef66.firebasestorage.app",
+            messagingSenderId: "772122910920",
+            appId: "1:772122910920:web:1b548a9118fb45146ac5fd",
+            measurementId: "G-LZHG2GKSH3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+
+        // --- Realtime Bot Status Updates ---
+        const statusRef = ref(db, 'botStatus');
+        const streamsRef = ref(db, 'dailyStreams');
+
+        // 1. Handle Bot Status & Guild Count
+        onValue(statusRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const statusContainer = document.getElementById('status-container');
+                const statusText = document.getElementById('status-text');
+                const statusIndicator = document.getElementById('status-indicator');
+                const serverCount = document.getElementById('server-count');
+
+                // Update Online Status & Colors
+                if (data.online) {
+                    statusContainer.classList.remove('text-red-500');
+                    statusContainer.classList.add('text-neon-green');
+                    statusIndicator.classList.remove('bg-red-500');
+                    statusIndicator.classList.add('bg-neon-green');
+                    statusText.innerText = "BOT ONLINE";
+                } else {
+                    statusContainer.classList.remove('text-neon-green');
+                    statusContainer.classList.add('text-red-500');
+                    statusIndicator.classList.remove('bg-neon-green');
+                    statusIndicator.classList.add('bg-red-500');
+                    statusText.innerText = "MAINTENANCE";
+                }
+
+                // Update Server Count (with flash effect)
+                if (data.guildCount) {
+                    const currentVal = serverCount.innerText;
+                    const newVal = data.guildCount.toLocaleString();
+                    if (currentVal !== newVal) {
+                        serverCount.innerText = newVal;
+                        triggerUpdateAnim(serverCount);
+                    }
+                }
+            }
+        }, (error) => {
+            console.error("Error reading bot status:", error);
+        });
+
+        // 2. Handle Streams (Calculate Total)
+        onValue(streamsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const streamCount = document.getElementById('stream-count');
+                // Sum up all values in the dailyStreams object
+                const totalStreams = Object.values(data).reduce((sum, count) => sum + count, 0);
+                
+                const currentVal = streamCount.innerText;
+                const newVal = totalStreams.toLocaleString();
+                
+                if (currentVal !== newVal) {
+                    streamCount.innerText = newVal;
+                    triggerUpdateAnim(streamCount);
+                }
+            }
+        }, (error) => {
+            console.error("Error reading streams:", error);
+        });
+
+        // Helper to trigger CSS animation
+        function triggerUpdateAnim(element) {
+            element.classList.remove('updated');
+            void element.offsetWidth; // Trigger reflow
+            element.classList.add('updated');
+        }
+
+        // --- Simulation Script (For Testing) ---
+        // Call startSimulation() in the console to test the effects!
+        window.startSimulation = () => {
+            console.log("Starting local simulation...");
+            
+            setInterval(() => {
+                const serverCount = document.getElementById('server-count');
+                const streamCount = document.getElementById('stream-count');
+                
+                // Simulate random increments
+                let currentServers = parseInt(serverCount.innerText.replace(/,/g, '')) || 14000;
+                let currentStreams = parseInt(streamCount.innerText.replace(/,/g, '')) || 1200000;
+                
+                currentServers += Math.floor(Math.random() * 5);
+                currentStreams += Math.floor(Math.random() * 50);
+
+                serverCount.innerText = currentServers.toLocaleString();
+                streamCount.innerText = currentStreams.toLocaleString();
+
+                triggerUpdateAnim(serverCount);
+                triggerUpdateAnim(streamCount);
+            }, 2000); // Update every 2 seconds
+        };
     </script>
 </body>
 </html>
